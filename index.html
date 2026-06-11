@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Visio">
+<meta name="theme-color" content="#0a0a0f">
+<title>Visio — AI Scanner (Free)</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/dist/mobilenet.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js" defer></script>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     SCREEN 1 — ONBOARDING
+══════════════════════════════════ -->
+<div class="screen active" id="screen-onboard">
+  <div class="onboard-logo">visio</div>
+  <div class="onboard-sub">AI Visual Scanner — 100% Free</div>
+
+  <div class="onboard-features">
+    <div class="feat-row">
+      <div class="feat-icon">🆓</div>
+      <div class="feat-text">
+        <strong>Completely free</strong>
+        Powered by Google Gemini — 1,500 free scans per day, no card needed
+      </div>
+    </div>
+    <div class="feat-row">
+      <div class="feat-icon">🔍</div>
+      <div class="feat-text">
+        <strong>Scan anything</strong>
+        Point at any object for an instant AI explanation, spoken aloud
+      </div>
+    </div>
+    <div class="feat-row">
+      <div class="feat-icon">🎙️</div>
+      <div class="feat-text">
+        <strong>Voice in, voice out</strong>
+        Ask questions by speaking — hear answers in your language
+      </div>
+    </div>
+    <div class="feat-row">
+      <div class="feat-icon">⚡</div>
+      <div class="feat-text">
+        <strong>6 smart modes</strong>
+        Scan · Read Text · Nutrition · Barcode · Danger · Quiz Me
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-start" onclick="enterApp()">Get Started — It's Free →</button>
+  <div style="margin-top:14px;font-size:11px;color:var(--text-dim);text-align:center;">
+    You'll need a free Google Gemini API key<br>
+    Get one at <span style="color:var(--accent)">aistudio.google.com</span>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════
+     SCREEN 2 — MAIN APP
+══════════════════════════════════ -->
+<div class="screen" id="screen-main">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-logo">visio<span>.ai</span></div>
+    <div class="topbar-actions">
+      <div class="icon-btn" id="api-status-btn" onclick="goSettings()" title="Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+      <div class="icon-btn" onclick="openHistory()" title="History">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span class="badge" id="hist-badge">0</span>
+      </div>
+      <div class="icon-btn" onclick="openShare()" title="Share last scan">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        </svg>
+      </div>
+      <div class="icon-btn" onclick="goSettings()" title="Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mode tabs -->
+  <div class="mode-tabs" id="mode-tabs"></div>
+
+  <!-- Camera -->
+  <div class="cam-wrap" id="cam-wrap">
+    <div class="cam-empty" id="cam-empty">
+      <div class="cam-empty-icon">📷</div>
+      <span>Starting camera…</span>
+    </div>
+    <video id="vid" autoplay playsinline muted></video>
+    <canvas id="canvas-main"></canvas>
+
+    <div class="scan-overlay" id="scan-overlay-el">
+      <div class="scan-line-el"></div>
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+    </div>
+
+    <div class="mode-badge" id="mode-badge">🔍 Scan mode</div>
+    <div class="danger-overlay" id="danger-overlay"></div>
+    <div class="cam-flash" id="cam-flash"></div>
+  </div>
+
+  <!-- Bottom panel -->
+  <div class="bottom-panel">
+
+    <!-- Response strip -->
+    <div class="response-strip" id="response-strip">
+      <div class="strip-top">
+        <div class="strip-label">
+          VISIO
+          <div class="wave">
+            <div class="wb"></div><div class="wb"></div>
+            <div class="wb"></div><div class="wb"></div>
+            <div class="wb"></div>
+          </div>
+        </div>
+        <button class="btn-circle" id="btn-stop" onclick="stopSpeaking()" disabled
+          style="width:28px;height:28px;border-radius:6px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="6" y="6" width="12" height="12" rx="2"/>
+          </svg>
+        </button>
+      </div>
+      <div id="resp-text" class="idle">
+        Point your camera at anything and tap SCAN — I'll explain it and speak the answer.
+      </div>
+    </div>
+
+    <!-- Voice question input -->
+    <div class="voice-row">
+      <div class="voice-input-wrap">
+        <input type="text" id="question-input" placeholder="ask a question (optional)…" />
+        <button class="btn-mic" id="btn-mic" title="Voice input">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Action bar -->
+    <div class="action-bar">
+      <button class="btn-circle" id="btn-flip" onclick="flipCamera()" disabled title="Flip camera">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 .49-3"/>
+        </svg>
+      </button>
+
+      <button class="btn-main-scan" id="btn-scan-main" onclick="doScan()" disabled>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+        SCAN
+      </button>
+
+      <button class="btn-circle" onclick="toggleAuto()" title="Auto scan every 3s">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════
+     SCREEN 3 — SETTINGS
+══════════════════════════════════ -->
+<div class="screen" id="screen-settings">
+  <div class="settings-header">
+    <button class="btn-back" onclick="backToMain()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </button>
+    <div class="settings-title">Settings</div>
+    <button onclick="saveSettings()"
+      style="padding:8px 16px;border-radius:8px;border:1px solid var(--accent);
+             background:var(--accent-dim);color:var(--accent);
+             font-family:var(--mono);font-size:12px;cursor:pointer;">
+      Save
+    </button>
+  </div>
+
+  <div class="settings-body">
+
+    <!-- FREE API KEY SECTION -->
+    <div>
+      <div class="settings-section-label">🆓 Free Gemini API Key</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-row-icon">🤖</div>
+          <div class="settings-row-info">
+            <div class="settings-row-label">Google Gemini API Key</div>
+            <div class="settings-row-desc">
+              Free · No credit card · 1,500 scans/day<br>
+              Get at <strong style="color:var(--accent)">aistudio.google.com</strong> → Get API Key
+            </div>
+          </div>
+        </div>
+        <div class="settings-row">
+          <input type="password" id="s-api-key"
+            placeholder="AIza…"
+            style="flex:1;margin:0;font-size:12px">
+        </div>
+        <!-- Step by step guide -->
+        <div style="padding:12px 16px;border-top:1px solid var(--border);">
+          <div style="font-size:10px;letter-spacing:0.08em;color:var(--text-dim);margin-bottom:10px;text-transform:uppercase;">
+            How to get your free key
+          </div>
+          <div class="how-to-step">
+            <span class="step-num">1</span>
+            <span>Open <strong>aistudio.google.com</strong> in your browser</span>
+          </div>
+          <div class="how-to-step">
+            <span class="step-num">2</span>
+            <span>Sign in with any <strong>Google account</strong></span>
+          </div>
+          <div class="how-to-step">
+            <span class="step-num">3</span>
+            <span>Click <strong>"Get API key"</strong> in the left sidebar</span>
+          </div>
+          <div class="how-to-step">
+            <span class="step-num">4</span>
+            <span>Click <strong>"Create API key"</strong> → copy the key</span>
+          </div>
+          <div class="how-to-step">
+            <span class="step-num">5</span>
+            <span>Paste it in the field above and tap <strong>Save</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LANGUAGE -->
+    <div>
+      <div class="settings-section-label">🌍 Language</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Response & Voice Language</div>
+            <div class="settings-row-desc">AI responds and speaks in this language</div>
+          </div>
+          <select id="s-lang">
+            <option value="en-US">English (US)</option>
+            <option value="en-GB">English (UK)</option>
+            <option value="hi-IN">हिन्दी — Hindi</option>
+            <option value="bn-IN">বাংলা — Bengali</option>
+            <option value="ta-IN">தமிழ் — Tamil</option>
+            <option value="te-IN">తెలుగు — Telugu</option>
+            <option value="mr-IN">मराठी — Marathi</option>
+            <option value="gu-IN">ગુજરાતી — Gujarati</option>
+            <option value="kn-IN">ಕನ್ನಡ — Kannada</option>
+            <option value="ml-IN">മലയാളം — Malayalam</option>
+            <option value="pa-IN">ਪੰਜਾਬੀ — Punjabi</option>
+            <option value="fr-FR">Français</option>
+            <option value="de-DE">Deutsch</option>
+            <option value="es-ES">Español</option>
+            <option value="ja-JP">日本語</option>
+            <option value="zh-CN">中文</option>
+            <option value="ar-SA">العربية</option>
+            <option value="pt-BR">Português</option>
+            <option value="ru-RU">Русский</option>
+            <option value="ko-KR">한국어</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- OFFLINE MODE -->
+    <div>
+      <div class="settings-section-label">✈️ Offline Mode</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Run AI on-device (no internet)</div>
+            <div class="settings-row-desc">Uses MobileNet locally. ~20MB download. Limited accuracy.</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="s-offline">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABOUT -->
+    <div>
+      <div class="settings-section-label">ℹ️ About</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Visio AI Scanner v2.0 — Free Edition</div>
+            <div class="settings-row-desc">
+              Powered by Google Gemini 2.0 Flash<br>
+              <strong style="color:var(--accent)">Install as app:</strong><br>
+              Android: Chrome → ⋮ → Add to Home Screen<br>
+              iPhone: Safari → Share → Add to Home Screen
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════
+     HISTORY DRAWER
+══════════════════════════════════ -->
+<div id="drawer-history">
+  <div class="drawer-header">
+    <button class="btn-back" onclick="closeHistory()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </button>
+    <div class="drawer-title">Scan History</div>
+    <button class="btn-clear" onclick="clearHistory()">Clear all</button>
+  </div>
+  <div class="history-list" id="history-list"></div>
+</div>
+
+
+<!-- ══════════════════════════════════
+     QUIZ MODAL
+══════════════════════════════════ -->
+<div id="quiz-modal">
+  <div class="quiz-card">
+    <div class="quiz-handle"></div>
+    <div class="quiz-q" id="quiz-q">Loading question…</div>
+    <div class="quiz-options" id="quiz-options"></div>
+    <div class="quiz-feedback" id="quiz-feedback"></div>
+    <button class="quiz-next" id="quiz-next" onclick="nextQuiz()">Next scan →</button>
+    <button onclick="closeQuiz()"
+      style="width:100%;margin-top:8px;padding:10px;border-radius:8px;
+             border:1px solid var(--border2);background:transparent;
+             color:var(--text-dim);font-family:var(--mono);font-size:12px;cursor:pointer;">
+      Close
+    </button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════
+     SHARE OVERLAY
+══════════════════════════════════ -->
+<div id="share-overlay" onclick="closeShare()">
+  <div class="share-card" onclick="event.stopPropagation()">
+    <img class="share-img" id="share-img" src="" alt="Scan">
+    <div class="share-body">
+      <div class="share-app-label">VISIO AI SCANNER — FREE</div>
+      <div class="share-resp-text" id="share-resp-text"></div>
+      <div class="share-actions">
+        <button class="btn-share-dl" onclick="downloadShare()">⬇ Save Image</button>
+        <button class="btn-share-close" onclick="closeShare()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Offline badge -->
+<div class="offline-badge">✈ Offline</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

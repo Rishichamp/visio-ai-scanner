@@ -1,0 +1,32 @@
+Visio Free Gemini script
+
+Step 1 — Install a simple local server
+In your terminal, type:
+bashnpm install -g live-server
+This installs live-server globally on your PC. Only needed once ever.
+
+Step 2 — Start the app
+You're already in the right folder. Just run:
+bashlive-server
+You'll see output like:
+Starting up http-server, serving ./
+Available on:
+  http://127.0.0.1:8080
+  http://192.168.x.x:8080
+Your browser will open automatically at http://127.0.0.1:8080 and the Visio app loads.
+
+Step 3 — Allow camera
+When the browser asks "Allow camera access" → click Allow
+
+Step 4 — Enter your Gemini key
+
+Click the 🔒 icon top-right → Settings
+Paste your AIza… key
+Click Save
+Start scanning!
+
+
+To stop the server
+Press Ctrl + C in the terminal.
+Next time you want to run it
+Just open terminal, cd to the folder, and run live-server — that's it.

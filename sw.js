@@ -1,4 +1,4 @@
-const CACHE = 'visio-v1';
+const CACHE = 'visio-v2';
 const ASSETS = [
   './',
   './index.html',

@@ -302,7 +302,8 @@ function handleQuiz(raw) {
   const wrap = $('quiz-options');
   wrap.innerHTML = '';
   q.options.forEach((opt, i) => {
-    const b = el('button','quiz-opt', opt);
+    const b = el('button','quiz-opt');
+    b.textContent = opt;  // model output — never as HTML
     b.onclick = () => answerQuiz(i, b, wrap);
     wrap.appendChild(b);
   });
@@ -405,14 +406,21 @@ function renderHistory() {
     return;
   }
   state.history.forEach(item => {
+    // Built with textContent: item.text is model output (it can echo text the
+    // camera read), so inserting it as HTML would let it run script.
     const div = el('div','history-item');
-    div.innerHTML = `
-      <img class="history-thumb" src="${item.img}" alt="">
-      <div class="history-info">
-        <div class="history-mode">${MODES[item.mode]?.icon||'🔍'} ${MODES[item.mode]?.label||item.mode}</div>
-        <div class="history-time">${item.time}</div>
-        <div class="history-resp">${item.text}</div>
-      </div>`;
+    const img = el('img','history-thumb');
+    img.alt = '';
+    if (typeof item.img === 'string' && item.img.startsWith('data:image/')) img.src = item.img;
+    const info = el('div','history-info');
+    const mode = el('div','history-mode');
+    mode.textContent = `${MODES[item.mode]?.icon||'🔍'} ${MODES[item.mode]?.label||item.mode}`;
+    const time = el('div','history-time');
+    time.textContent = item.time;
+    const resp = el('div','history-resp');
+    resp.textContent = item.text;
+    info.append(mode, time, resp);
+    div.append(img, info);
     div.onclick = () => { setResponse(item.text); speak(item.text); closeHistory(); };
     list.appendChild(div);
   });

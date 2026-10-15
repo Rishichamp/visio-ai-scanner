@@ -6,7 +6,7 @@
 [![PWA](https://img.shields.io/badge/PWA-5A0FC8?logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-> A **Progressive Web App** that turns your camera into an AI-powered visual scanner — powered by Google Gemini 2.0 Flash. Point at anything and get instant AI analysis, spoken aloud in your language. **100% free, no backend, no subscription.**
+> A **Progressive Web App** that turns your camera into an AI-powered visual scanner — powered by Google Gemini Flash. Point at anything and get instant AI analysis, spoken aloud in your language. **100% free, no backend, no subscription.**
 
 🌐 **[Live Demo →](https://rishichamp.github.io/visio-ai-scanner)**
 
@@ -36,7 +36,7 @@
 | Layer | Technology |
 |---|---|
 | UI | Vanilla HTML5, CSS3, JavaScript (ES2022) |
-| AI Vision | Google Gemini 2.0 Flash (`gemini-2.0-flash`) |
+| AI Vision | Google Gemini Flash (`gemini-flash-latest`, always the current Flash model) |
 | Offline AI | TensorFlow.js + MobileNet v2 |
 | QR / Barcode | jsQR |
 | Speech | Web Speech API (SpeechRecognition + SpeechSynthesis) |
@@ -107,7 +107,7 @@ captureFrame() → canvas → JPEG base64
         ↓
 callGemini(imageB64, modePrompt)
         ↓
-POST → Gemini 2.0 Flash API (vision + text)
+POST → Gemini Flash API (vision + text)
         ↓
 Response text → displayed + spoken aloud (TTS)
         ↓
@@ -144,4 +144,4 @@ MIT License — free to use, modify, and distribute.
 
 ---
 
-*Built with Google Gemini 2.0 Flash · TensorFlow.js · Web Speech API · PWA*
+*Built with Google Gemini Flash · TensorFlow.js · Web Speech API · PWA*

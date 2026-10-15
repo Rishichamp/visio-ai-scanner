@@ -15,6 +15,16 @@ const MODES = {
   quiz:      { label:'Quiz Me',    icon:'🎯', color:'var(--quiz)',    prompt:'Identify the object and return ONLY this JSON (no markdown, no backticks): {"object":"name","question":"a question about it","options":["A","B","C","D"],"correct":0,"explanation":"why A is correct"}' },
 };
 
+// A corrupted history entry in localStorage used to stop the app from starting.
+function loadHistory() {
+  try {
+    const h = JSON.parse(localStorage.getItem('visio_history') || '[]');
+    return Array.isArray(h) ? h : [];
+  } catch {
+    return [];
+  }
+}
+
 // ── STATE ─────────────────────────────────────────────────
 let state = {
   apiKey:       sessionStorage.getItem('visio_gemini_key') || '',
@@ -31,7 +41,7 @@ let state = {
   tfModel:      null,
   tfLoading:    false,
   offlineMode:  localStorage.getItem('visio_offline') === 'true',
-  history:      JSON.parse(localStorage.getItem('visio_history') || '[]'),
+  history:      loadHistory(),
   currentImage: null,
   currentResponse: '',
   quizData:     null,
@@ -39,9 +49,10 @@ let state = {
 
 // ── GEMINI API CALL ───────────────────────────────────────
 async function callGemini(imageB64, promptText) {
-  // Use gemini-2.0-flash — free tier, fast, great vision
-  const model = 'gemini-2.0-flash';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${state.apiKey}`;
+  // "-latest" follows Google's current Flash model (free tier, vision), so a
+  // model retirement (gemini-2.0-flash is being shut down) doesn't break the app.
+  const model = 'gemini-flash-latest';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
   const langName = getLanguageName(state.lang);
   const systemInstruction = `You are Visio, a friendly visual AI assistant. Always respond in ${langName}. Be concise, natural, and conversational — as if speaking aloud to someone.`;
@@ -59,7 +70,8 @@ async function callGemini(imageB64, promptText) {
 
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    // key in a header, not the URL (URLs end up in history, logs and caches)
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': state.apiKey },
     body: JSON.stringify(body)
   });
 

@@ -1,4 +1,4 @@
-const CACHE = 'visio-v2';
+const CACHE = 'visio-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -27,8 +27,27 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
+// The app's own files are network-first (so a new deploy reaches users
+// without bumping CACHE by hand), falling back to the cache when offline.
+// Pinned CDN libraries and fonts are cache-first. Non-GET requests (the
+// Gemini API) are not touched.
 self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request).catch(() => cached))
-  );
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const sameOrigin = new URL(req.url).origin === self.location.origin;
+  if (sameOrigin) {
+    e.respondWith(
+      fetch(req)
+        .then(res => {
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE).then(c => c.put(req, copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match(req).then(cached => cached || caches.match('./index.html')))
+    );
+    return;
+  }
+  e.respondWith(caches.match(req).then(cached => cached || fetch(req)));
 });

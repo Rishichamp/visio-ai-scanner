@@ -49,17 +49,20 @@
 ## Getting Started
 
 ### Option 1 — Use the live app
+
 Visit **[rishichamp.github.io/visio-ai-scanner](https://rishichamp.github.io/visio-ai-scanner)** — no install needed.
 
 ### Option 2 — Run locally
 
 **1. Clone the repo**
+
 ```bash
 git clone https://github.com/Rishichamp/visio-ai-scanner.git
 cd visio-ai-scanner
 ```
 
 **2. Start a local server**
+
 ```bash
 npm install -g live-server
 live-server
